@@ -5,14 +5,13 @@ int confPlayersNum = 2;
 int confTimer = 5000;
 int confWordMinLength = 8;
 int confWordMaxLength = 30;
-char[] confForbiddenChars = [' ', ',', '.', '!', '?', '&'];
 
 //read base word
 Console.Write($"Enter the base word ({confWordMinLength}-{confWordMaxLength} chars): ");
 var word = Console.ReadLine();
 
 //start game if a word matches input criteria
-if (!isBaseWordLengthCorrect(word, confWordMinLength, confWordMaxLength, confForbiddenChars))
+if (!isBaseWordLengthCorrect(word, confWordMinLength, confWordMaxLength))
 {
     Console.WriteLine("The base word does not match the initial criteria or contains forbidden characters. The game did not start");
 }
@@ -174,7 +173,7 @@ List<char> splitBaseWord(String word)
     return charList;
 }
 
-static bool isBaseWordLengthCorrect(String word, int minChars, int maxChars, char[] forbiddenChars)
+static bool isBaseWordLengthCorrect(String word, int minChars, int maxChars)
 {
-    return word.Length >= minChars && word.Length <= maxChars && !word.AsSpan().ContainsAny(forbiddenChars);
+    return word.Length >= minChars && word.Length <= maxChars && word.All(char.IsLetter);
 }
