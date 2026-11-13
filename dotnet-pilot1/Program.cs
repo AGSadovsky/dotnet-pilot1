@@ -1,7 +1,7 @@
 ﻿//game config
 using System.Text;
 
-int confPlayersNum = 3;
+int confPlayersNum = 2;
 int confTimer = 5000;
 int confWordMinLength = 8;
 int confWordMaxLength = 30;
@@ -43,7 +43,9 @@ void gameStart()
 
         flag = canBuildNewWord(letterCombinations, userWord)
             && isUniqueWord(userWord, uniqueWords)
-            && isCorrectWord(userWord);
+            && isCorrectWord(userWord)
+            ;
+
     }
 
     Console.WriteLine($"Player {currentPlayer}, you lost!");
@@ -51,6 +53,11 @@ void gameStart()
 
 bool isCorrectWord(string userWord)
 {
+    if (userWord.Length <= 1)
+    {
+        Console.WriteLine("The minimun word length should be more than 1 symbol");
+    }
+
     return userWord.Length > 1;
 }
 
@@ -83,7 +90,10 @@ static bool canBuildNewWord(List<char> letterCombinations, String userWord)
     foreach (char letter in userWord.ToLower())
     {
         if (!letterCounts.ContainsKey(letter) || letterCounts[letter] == 0)
+        {
+            Console.WriteLine("The entered word is incorrect!");
             return false;
+        }
 
         letterCounts[letter]--;
     }
@@ -146,7 +156,14 @@ string wordEnter()
 
 static bool isUniqueWord(String userWord, HashSet<string> uniqueWords)
 {
-    return uniqueWords.Add(userWord);
+    bool result = uniqueWords.Add(userWord);
+
+    if (!result)
+    {
+        Console.WriteLine("The word is not unique!");
+    }
+
+    return result;
 }
 
 List<char> splitBaseWord(String word)
