@@ -1,68 +1,65 @@
 ﻿//game config
 using System.Text;
 
-int confPlayersNum = 2;
-int confTimer = 5000;
-int confWordMinLength = 8;
-int confWordMaxLength = 30;
+const int PlayersNumber = 2;
+const int TimerDurationMs = 5000;
+const int MinWordLength = 8;
+const int MaxWordLength = 30;
 
 //read base word
-Console.Write($"Enter the base word ({confWordMinLength}-{confWordMaxLength} chars): ");
-var word = Console.ReadLine();
+Console.Write($"Enter the base word ({MinWordLength}-{MaxWordLength} chars): ");
+string baseWord = Console.ReadLine() ?? string.Empty;
 
 //start game if a word matches input criteria
-if (!isBaseWordLengthCorrect(word, confWordMinLength, confWordMaxLength))
+if (!IsBaseWordValid(baseWord))
 {
     Console.WriteLine("The base word does not match the initial criteria or contains forbidden characters. The game did not start");
 }
 else
 {
-    Console.WriteLine($"Base word is '{word}'");
-    Console.WriteLine($"Each player has {confTimer / 1000} seconds to enter a word containing letters from the base word only");
-    gameStart();
+    Console.WriteLine($"Base word is '{baseWord}'");
+    Console.WriteLine($"Each player has {TimerDurationMs / 1000} seconds to enter a word containing letters from the base word only");
+    StartGame(baseWord);
 }
 
-void gameStart()
+void StartGame(string validBaseWord)
 {
-    var uniqueWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-    uniqueWords.Add(word);
-
-    var letterCombinations = splitBaseWord(word.ToLower());
+    var uniqueWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { validBaseWord };
+        
+    var baseWordLetters = SplitBaseWord(validBaseWord.ToLower());
 
     int currentPlayer = 0;
-    bool flag = true;
+    bool canContinueGame = true;
 
     //play until a user enters an incorrect word or the timer is up
-    while (flag)
+    while (canContinueGame)
     {
-        currentPlayer = selectPlayer(currentPlayer);
+        currentPlayer = GetNextPLayer(currentPlayer);
         Console.WriteLine($"Player {currentPlayer}, your turn!");
 
-        string userWord = wordEnter();
+        string userWord = EnterWord();
 
-        flag = canBuildNewWord(letterCombinations, userWord)
-            && isUniqueWord(userWord, uniqueWords)
-            && isCorrectWord(userWord)
-            ;
-
+        canContinueGame = CanBuildNewWord(baseWordLetters, userWord)
+            && IsUniqueWord(userWord, uniqueWords)
+            && IsWordLengthValid(userWord);
     }
 
     Console.WriteLine($"Player {currentPlayer}, you lost!");
 }
 
-bool isCorrectWord(string userWord)
+bool IsWordLengthValid(string userWord)
 {
     if (userWord.Length <= 1)
     {
-        Console.WriteLine("The minimun word length should be more than 1 symbol");
+        Console.WriteLine("The minimum word length should be more than 1 symbol");
     }
 
     return userWord.Length > 1;
 }
 
-int selectPlayer(int currentPlayer)
+int GetNextPLayer(int currentPlayer)
 {
-    if (currentPlayer < confPlayersNum)
+    if (currentPlayer < PlayersNumber)
     {
         currentPlayer++;
     }
@@ -74,9 +71,9 @@ int selectPlayer(int currentPlayer)
     return currentPlayer;
 }
 
-static bool canBuildNewWord(List<char> letterCombinations, String userWord)
+bool CanBuildNewWord(List<char> letterCombinations, string userWord)
 {
-    var letterCounts = new Dictionary<char, int>();//create HashMap
+    var letterCounts = new Dictionary<char, int>();
 
     foreach (char letter in letterCombinations)
     {
@@ -100,13 +97,13 @@ static bool canBuildNewWord(List<char> letterCombinations, String userWord)
     return true;
 }
 
-string wordEnter()
+string EnterWord()
 {
-    var timer = new System.Timers.Timer(confTimer);
+    var timer = new System.Timers.Timer(TimerDurationMs);
     bool isElapsed = false;
     timer.AutoReset = false;
 
-    timer.Elapsed += (sender, e) =>
+    timer.Elapsed += (_, _) =>
     {
         isElapsed = true;
     };
@@ -153,7 +150,7 @@ string wordEnter()
     return inputBuffer.ToString();
 }
 
-static bool isUniqueWord(String userWord, HashSet<string> uniqueWords)
+bool IsUniqueWord(string userWord, HashSet<string> uniqueWords)
 {
     bool result = uniqueWords.Add(userWord);
 
@@ -165,15 +162,14 @@ static bool isUniqueWord(String userWord, HashSet<string> uniqueWords)
     return result;
 }
 
-List<char> splitBaseWord(String word)
+List<char> SplitBaseWord(string word)
 {
-    List<char> charList = new List<char>(30);
-    charList = word.ToList();
-
-    return charList;
+    return word.ToList();
 }
 
-static bool isBaseWordLengthCorrect(String word, int minChars, int maxChars)
+bool IsBaseWordValid(string word)
 {
-    return word.Length >= minChars && word.Length <= maxChars && word.All(char.IsLetter);
+    return word.Length >= MinWordLength
+        && word.Length <= MaxWordLength
+        && word.All(char.IsLetter);
 }
