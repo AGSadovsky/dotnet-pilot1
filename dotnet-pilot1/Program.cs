@@ -11,28 +11,26 @@ const int MaxWordLength = 30;
 Console.OutputEncoding = Encoding.UTF8;
 Console.InputEncoding = Encoding.UTF8;
 
-bool isLanguageSelected = true;
-while (isLanguageSelected)
+bool isLanguageSelected = false;
+while (!isLanguageSelected)
 {
     Console.WriteLine(Messages.ChooseLang);
     Console.Write("> ");
     string? choice = Console.ReadLine();
 
-    if (choice == "0") break;
-
     switch (choice)
     {
-       case "1":
-        ChangeLanguage("en-US");
-       isLanguageSelected = false;
-        break;
-    case "2":
-        ChangeLanguage("ru-RU");
-       isLanguageSelected = false;
-        break;
-    default:
-        Console.WriteLine("Invalid input\n");
-        continue;
+        case "1":
+            ChangeLanguage("en-US");
+            isLanguageSelected = true;
+            break;
+        case "2":
+            ChangeLanguage("ru-RU");
+            isLanguageSelected = true;
+            break;
+        default:
+            Console.WriteLine("Invalid input\n");
+            continue;
     }
 
     Console.WriteLine("-----------------------------------------");
