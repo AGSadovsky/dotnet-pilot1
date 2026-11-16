@@ -1,4 +1,6 @@
 ﻿//game config
+using dotnet_pilot1;
+using System.Globalization;
 using System.Text;
 
 const int PlayersNumber = 2;
@@ -6,22 +8,64 @@ const int TimerDurationMs = 5000;
 const int MinWordLength = 8;
 const int MaxWordLength = 30;
 
+Console.OutputEncoding = Encoding.UTF8;
+Console.InputEncoding = Encoding.UTF8;
+
+bool isLanguageSelected = true;
+while (isLanguageSelected)
+{
+    Console.WriteLine(Messages.ChooseLang);
+    Console.Write("> ");
+    string? choice = Console.ReadLine();
+
+    if (choice == "0") break;
+
+    switch (choice)
+    {
+       case "1":
+        ChangeLanguage("en-US");
+       isLanguageSelected = false;
+        break;
+    case "2":
+        ChangeLanguage("ru-RU");
+       isLanguageSelected = false;
+        break;
+    default:
+        Console.WriteLine("Invalid input\n");
+        continue;
+    }
+
+    Console.WriteLine("-----------------------------------------");
+    Console.WriteLine(string.Format(Messages.Greeting));
+    Console.WriteLine(string.Format(Messages.GameRules, TimerDurationMs / 1000));
+    Console.WriteLine("-----------------------------------------\n");
+}
+        
 //read base word
-Console.Write($"Enter the base word ({MinWordLength}-{MaxWordLength} chars): ");
+Console.WriteLine(string.Format(Messages.BaseWordEnter, MinWordLength, MaxWordLength));
 string baseWord = Console.ReadLine() ?? string.Empty;
 
 //start game if a word matches input criteria
 if (!IsBaseWordValid(baseWord))
 {
-    Console.WriteLine("The base word does not match the initial criteria or contains forbidden characters. The game did not start");
+    Console.WriteLine(string.Format(Messages.InitialCriteriaError));
 }
 else
 {
-    Console.WriteLine($"Base word is '{baseWord}'");
-    Console.WriteLine($"Each player has {TimerDurationMs / 1000} seconds to enter a word containing letters from the base word only");
+    Console.WriteLine(string.Format(Messages.BaseWordInfo, baseWord));
     StartGame(baseWord);
 }
 
+static void ChangeLanguage(string cultureName)
+{
+    var culture = new CultureInfo(cultureName);
+
+    Thread.CurrentThread.CurrentCulture = culture;
+    Thread.CurrentThread.CurrentUICulture = culture;
+
+    CultureInfo.DefaultThreadCurrentCulture = culture;
+    CultureInfo.DefaultThreadCurrentUICulture = culture;
+}
 void StartGame(string validBaseWord)
 {
     var uniqueWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { validBaseWord };
@@ -35,23 +79,26 @@ void StartGame(string validBaseWord)
     while (canContinueGame)
     {
         currentPlayer = GetNextPLayer(currentPlayer);
-        Console.WriteLine($"Player {currentPlayer}, your turn!");
+        Console.WriteLine(string.Format(Messages.PlayerTurn, currentPlayer));
 
         string userWord = EnterWord();
 
-        canContinueGame = CanBuildNewWord(baseWordLetters, userWord)
-            && IsUniqueWord(userWord, uniqueWords)
-            && IsWordLengthValid(userWord);
+        if (userWord != "-1")
+            canContinueGame = CanBuildNewWord(baseWordLetters, userWord)
+                && IsUniqueWord(userWord, uniqueWords)
+                && IsWordLengthValid(userWord);
+        else
+            canContinueGame = false;
     }
 
-    Console.WriteLine($"Player {currentPlayer}, you lost!");
+    Console.WriteLine(string.Format(Messages.PlayerLost, currentPlayer));
 }
 
 bool IsWordLengthValid(string userWord)
 {
     if (userWord.Length <= 1)
     {
-        Console.WriteLine("The minimum word length should be more than 1 symbol");
+        Console.WriteLine(string.Format(Messages.InvalidWordLength));
     }
 
     return userWord.Length > 1;
@@ -71,11 +118,11 @@ int GetNextPLayer(int currentPlayer)
     return currentPlayer;
 }
 
-bool CanBuildNewWord(List<char> letterCombinations, string userWord)
+bool CanBuildNewWord(List<char> baseWordLetters, string userWord)
 {
     var letterCounts = new Dictionary<char, int>();
 
-    foreach (char letter in letterCombinations)
+    foreach (char letter in baseWordLetters)
     {
         if (letterCounts.ContainsKey(letter))
             letterCounts[letter]++;
@@ -87,7 +134,7 @@ bool CanBuildNewWord(List<char> letterCombinations, string userWord)
     {
         if (!letterCounts.ContainsKey(letter) || letterCounts[letter] == 0)
         {
-            Console.WriteLine("The entered word is incorrect!");
+            Console.WriteLine(string.Format(Messages.IncorrectWord));
             return false;
         }
 
@@ -142,7 +189,8 @@ string EnterWord()
 
     if (isElapsed)
     {
-        Console.WriteLine("Time is up");
+        Console.WriteLine($"\n{string.Format(Messages.TimeIsUp)}");
+        return "-1";
     }
 
     timer.Dispose();
@@ -156,7 +204,7 @@ bool IsUniqueWord(string userWord, HashSet<string> uniqueWords)
 
     if (!result)
     {
-        Console.WriteLine("The word is not unique!");
+        Console.WriteLine(string.Format(Messages.UserWordIsNotUnique));
     }
 
     return result;
