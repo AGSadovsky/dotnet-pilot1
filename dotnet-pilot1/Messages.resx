@@ -150,7 +150,7 @@
   <data name="TimeIsUp" xml:space="preserve">
     <value>Time is up!</value>
   </data>
-  <data name="UserWordIsNotUnique" xml:space="preserve">
+  <data name="DuplicateUserWord" xml:space="preserve">
     <value>The word is not unique!</value>
   </data>
 </root>

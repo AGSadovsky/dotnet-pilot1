@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace dotnet_pilot1 {
+namespace DotnetPilot1 {
     using System;
     
     
@@ -88,6 +88,15 @@ namespace dotnet_pilot1 {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The word is not unique!.
+        /// </summary>
+        public static string DuplicateUserWord {
+            get {
+                return ResourceManager.GetString("DuplicateUserWord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Each player has {0} seconds to enter a word containing letters from the base word only.
         /// </summary>
         public static string GameRules {
@@ -156,15 +165,6 @@ namespace dotnet_pilot1 {
         public static string TimeIsUp {
             get {
                 return ResourceManager.GetString("TimeIsUp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The word is not unique!.
-        /// </summary>
-        public static string UserWordIsNotUnique {
-            get {
-                return ResourceManager.GetString("UserWordIsNotUnique", resourceCulture);
             }
         }
     }

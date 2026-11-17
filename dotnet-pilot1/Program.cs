@@ -1,5 +1,4 @@
-﻿//game config
-using dotnet_pilot1;
+﻿using DotnetPilot1;
 using System.Globalization;
 using System.Text;
 
@@ -7,6 +6,7 @@ const int PlayersNumber = 2;
 const int TimerDurationMs = 5000;
 const int MinWordLength = 8;
 const int MaxWordLength = 30;
+const string TimeoutSignal = "-1";
 
 Console.OutputEncoding = Encoding.UTF8;
 Console.InputEncoding = Encoding.UTF8;
@@ -34,7 +34,7 @@ while (!isLanguageSelected)
     }
 
     Console.WriteLine("-----------------------------------------");
-    Console.WriteLine(string.Format(Messages.Greeting));
+    Console.WriteLine(Messages.Greeting);
     Console.WriteLine(string.Format(Messages.GameRules, TimerDurationMs / 1000));
     Console.WriteLine("-----------------------------------------\n");
 }
@@ -46,7 +46,7 @@ string baseWord = Console.ReadLine() ?? string.Empty;
 //start game if a word matches input criteria
 if (!IsBaseWordValid(baseWord))
 {
-    Console.WriteLine(string.Format(Messages.InitialCriteriaError));
+    Console.WriteLine(Messages.InitialCriteriaError);
 }
 else
 {
@@ -76,12 +76,12 @@ void StartGame(string validBaseWord)
     //play until a user enters an incorrect word or the timer is up
     while (canContinueGame)
     {
-        currentPlayer = GetNextPLayer(currentPlayer);
+        currentPlayer = GetNextPlayer(currentPlayer);
         Console.WriteLine(string.Format(Messages.PlayerTurn, currentPlayer));
 
         string userWord = EnterWord();
 
-        if (userWord != "-1")
+        if (userWord != TimeoutSignal)
             canContinueGame = CanBuildNewWord(baseWordLetters, userWord)
                 && IsUniqueWord(userWord, uniqueWords)
                 && IsWordLengthValid(userWord);
@@ -96,13 +96,13 @@ bool IsWordLengthValid(string userWord)
 {
     if (userWord.Length <= 1)
     {
-        Console.WriteLine(string.Format(Messages.InvalidWordLength));
+        Console.WriteLine(Messages.InvalidWordLength);
     }
 
     return userWord.Length > 1;
 }
 
-int GetNextPLayer(int currentPlayer)
+int GetNextPlayer(int currentPlayer)
 {
     if (currentPlayer < PlayersNumber)
     {
@@ -132,7 +132,7 @@ bool CanBuildNewWord(List<char> baseWordLetters, string userWord)
     {
         if (!letterCounts.ContainsKey(letter) || letterCounts[letter] == 0)
         {
-            Console.WriteLine(string.Format(Messages.IncorrectWord));
+            Console.WriteLine(Messages.IncorrectWord);
             return false;
         }
 
@@ -144,7 +144,7 @@ bool CanBuildNewWord(List<char> baseWordLetters, string userWord)
 
 string EnterWord()
 {
-    var timer = new System.Timers.Timer(TimerDurationMs);
+    using var timer = new System.Timers.Timer(TimerDurationMs);
     bool isElapsed = false;
     timer.AutoReset = false;
 
@@ -187,11 +187,9 @@ string EnterWord()
 
     if (isElapsed)
     {
-        Console.WriteLine($"\n{string.Format(Messages.TimeIsUp)}");
-        return "-1";
+        Console.WriteLine($"\n{Messages.TimeIsUp}");
+        return TimeoutSignal;
     }
-
-    timer.Dispose();
 
     return inputBuffer.ToString();
 }
@@ -202,7 +200,7 @@ bool IsUniqueWord(string userWord, HashSet<string> uniqueWords)
 
     if (!result)
     {
-        Console.WriteLine(string.Format(Messages.UserWordIsNotUnique));
+        Console.WriteLine(Messages.DuplicateUserWord);
     }
 
     return result;
