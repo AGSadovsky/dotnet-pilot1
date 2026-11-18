@@ -45,9 +45,7 @@ string baseWord = Console.ReadLine() ?? string.Empty;
 
 //start game if a word matches input criteria
 if (!IsBaseWordValid(baseWord))
-{
     Console.WriteLine(Messages.InitialCriteriaError);
-}
 else
 {
     Console.WriteLine(string.Format(Messages.BaseWordInfo, baseWord));
@@ -64,6 +62,7 @@ static void ChangeLanguage(string cultureName)
     CultureInfo.DefaultThreadCurrentCulture = culture;
     CultureInfo.DefaultThreadCurrentUICulture = culture;
 }
+
 void StartGame(string validBaseWord)
 {
     var uniqueWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { validBaseWord };
@@ -72,6 +71,10 @@ void StartGame(string validBaseWord)
 
     int currentPlayer = 0;
     bool canContinueGame = true;
+    bool canBuildNewWord;
+    bool isUniqueWord;
+    bool isWordLengthValid;
+
 
     //play until a user enters an incorrect word or the timer is up
     while (canContinueGame)
@@ -81,12 +84,28 @@ void StartGame(string validBaseWord)
 
         string userWord = EnterWord();
 
+        canBuildNewWord = CanBuildNewWord(baseWordLetters, userWord);
+        isUniqueWord = IsUniqueWord(userWord, uniqueWords);
+        isWordLengthValid = IsWordLengthValid(userWord);
+        
         if (userWord != TimeoutSignal)
-            canContinueGame = CanBuildNewWord(baseWordLetters, userWord)
-                && IsUniqueWord(userWord, uniqueWords)
-                && IsWordLengthValid(userWord);
+        {
+            canContinueGame = canBuildNewWord
+                && isUniqueWord
+                && isWordLengthValid;
+
+            if (!canBuildNewWord)
+                Console.WriteLine(Messages.IncorrectWord);
+            else if (!isUniqueWord)
+                Console.WriteLine(Messages.DuplicateUserWord);
+            else if (!isWordLengthValid)
+                Console.WriteLine(Messages.InvalidWordLength);
+        }
         else
+        {
             canContinueGame = false;
+            Console.WriteLine($"\n{Messages.TimeIsUp}");
+        }
     }
 
     Console.WriteLine(string.Format(Messages.PlayerLost, currentPlayer));
@@ -94,32 +113,23 @@ void StartGame(string validBaseWord)
 
 bool IsWordLengthValid(string userWord)
 {
-    if (userWord.Length <= 1)
-    {
-        Console.WriteLine(Messages.InvalidWordLength);
-    }
-
     return userWord.Length > 1;
 }
 
 int GetNextPlayer(int currentPlayer)
 {
     if (currentPlayer < PlayersNumber)
-    {
         currentPlayer++;
-    }
     else
-    {
         currentPlayer = 1;
-    }
 
     return currentPlayer;
 }
 
 bool CanBuildNewWord(List<char> baseWordLetters, string userWord)
 {
-    var letterCounts = new Dictionary<char, int>();
-
+    var letterCounts = new Dictionary<char, int>(30);
+    
     foreach (char letter in baseWordLetters)
     {
         if (letterCounts.ContainsKey(letter))
@@ -131,10 +141,7 @@ bool CanBuildNewWord(List<char> baseWordLetters, string userWord)
     foreach (char letter in userWord.ToLower())
     {
         if (!letterCounts.ContainsKey(letter) || letterCounts[letter] == 0)
-        {
-            Console.WriteLine(Messages.IncorrectWord);
             return false;
-        }
 
         letterCounts[letter]--;
     }
@@ -186,24 +193,14 @@ string EnterWord()
     }
 
     if (isElapsed)
-    {
-        Console.WriteLine($"\n{Messages.TimeIsUp}");
         return TimeoutSignal;
-    }
 
     return inputBuffer.ToString();
 }
 
 bool IsUniqueWord(string userWord, HashSet<string> uniqueWords)
 {
-    bool result = uniqueWords.Add(userWord);
-
-    if (!result)
-    {
-        Console.WriteLine(Messages.DuplicateUserWord);
-    }
-
-    return result;
+    return uniqueWords.Add(userWord);
 }
 
 List<char> SplitBaseWord(string word)
